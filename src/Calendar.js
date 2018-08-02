@@ -1,3 +1,4 @@
+import { ZonedDateTime, ZoneId } from 'js-joda'
 import PropTypes from 'prop-types'
 import React from 'react'
 import uncontrollable from 'uncontrollable'
@@ -11,6 +12,7 @@ import {
 } from './utils/propTypes'
 
 import { notify } from './utils/helpers'
+import { convertToTimezone } from './utils/dayViewLayout/event'
 import { navigate, views } from './utils/constants'
 import defaultFormats from './formats'
 import message from './utils/messages'
@@ -24,6 +26,7 @@ import omit from 'lodash/omit'
 import defaults from 'lodash/defaults'
 import transform from 'lodash/transform'
 import mapValues from 'lodash/mapValues'
+import 'js-joda-timezone'
 
 function viewNames(_views) {
   return !Array.isArray(_views) ? Object.keys(_views) : _views
@@ -72,7 +75,7 @@ class Calendar extends React.Component {
      *
      * @controllable onNavigate
      */
-    date: PropTypes.instanceOf(Date),
+    date: PropTypes.object,
 
     /**
      * The current view of the calendar.
@@ -115,6 +118,12 @@ class Calendar extends React.Component {
      * ```
      */
     events: PropTypes.arrayOf(PropTypes.object),
+
+    /**
+     * Timezone in IANA format i.e 'America/Los_Angeles'
+     */
+    timezone: PropTypes.string.isRequired,
+    onTzChange: PropTypes.func,
 
     /**
      * Accessor for the event title, used to display event information. Should
@@ -227,9 +236,9 @@ class Calendar extends React.Component {
      * using the `startAccessor` and `endAccessor` properties.
      *
      * @type {func}
-     * @default () => new Date()
+     * @default () => ZonedDateTime.now()
      */
-    getNow: PropTypes.func,
+    // getNow: PropTypes.func,
 
     /**
      * Callback fired when the `date` value changes.
@@ -487,17 +496,17 @@ class Calendar extends React.Component {
     /**
      * Constrains the minimum _time_ of the Day and Week views.
      */
-    min: PropTypes.instanceOf(Date),
+    min: PropTypes.object,
 
     /**
      * Constrains the maximum _time_ of the Day and Week views.
      */
-    max: PropTypes.instanceOf(Date),
+    max: PropTypes.object,
 
     /**
      * Determines how far down the scroll pane is initially scrolled down.
      */
-    scrollToTime: PropTypes.instanceOf(Date),
+    scrollToTime: PropTypes.object,
 
     /**
      * Specify a specific culture code for the Calendar.
@@ -683,12 +692,15 @@ class Calendar extends React.Component {
     startAccessor: 'start',
     endAccessor: 'end',
     resourceAccessor: 'resourceId',
-
     resourceIdAccessor: 'id',
     resourceTitleAccessor: 'title',
-
     longPressThreshold: 250,
-    getNow: () => new Date(),
+  }
+
+  getNow = () => {
+    const { timezone } = this.props
+    const now = ZonedDateTime.now(timezone && ZoneId.of(timezone))
+    return ZonedDateTime.now(timezone && ZoneId.of(timezone))
   }
 
   getViews = () => {
@@ -731,6 +743,8 @@ class Calendar extends React.Component {
       toolbar,
       events,
       culture,
+      timezone,
+      onTzChange,
       components = {},
       formats = {},
       messages = {},
@@ -738,12 +752,11 @@ class Calendar extends React.Component {
       className,
       elementProps,
       date: current,
-      getNow,
       length,
       ...props
     } = this.props
 
-    current = current || getNow()
+    current = convertToTimezone(current || this.getNow(), timezone)
 
     formats = defaultFormats(formats)
     messages = message(messages)
@@ -775,9 +788,12 @@ class Calendar extends React.Component {
         {toolbar && (
           <CalToolbar
             date={current}
+            timezone={timezone}
+            getNow={this.getNow}
             view={view}
             views={names}
             label={label}
+            onTzChange={onTzChange}
             onViewChange={this.handleViewChange}
             onNavigate={this.handleNavigate}
             messages={messages}
@@ -792,7 +808,8 @@ class Calendar extends React.Component {
           formats={undefined}
           events={events}
           date={current}
-          getNow={getNow}
+          timezone={timezone}
+          getNow={this.getNow}
           length={length}
           components={viewComponents}
           getDrilldownView={this.getDrilldownView}
@@ -808,14 +825,14 @@ class Calendar extends React.Component {
   }
 
   handleNavigate = (action, newDate) => {
-    let { view, date, getNow, onNavigate, ...props } = this.props
+    let { view, date, onNavigate, ...props } = this.props
     let ViewComponent = this.getView()
 
     date = moveDate(ViewComponent, {
       ...props,
       action,
       date: newDate || date,
-      today: getNow(),
+      today: this.getNow(),
     })
 
     onNavigate(date, view, action)

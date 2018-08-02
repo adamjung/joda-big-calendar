@@ -26,15 +26,17 @@ let eventsForWeek = (evts, start, end, props) =>
 
 let propTypes = {
   events: PropTypes.array.isRequired,
-  date: PropTypes.instanceOf(Date),
+  timezone: PropTypes.string.isRequired,
 
-  min: PropTypes.instanceOf(Date),
-  max: PropTypes.instanceOf(Date),
+  date: PropTypes.object,
+
+  min: PropTypes.object,
+  max: PropTypes.object,
 
   step: PropTypes.number,
   getNow: PropTypes.func.isRequired,
 
-  scrollToTime: PropTypes.instanceOf(Date),
+  scrollToTime: PropTypes.object,
   eventPropGetter: PropTypes.func,
   dayPropGetter: PropTypes.func,
 
@@ -164,6 +166,7 @@ class MonthView extends React.Component {
       messages,
       selected,
       date,
+      timezone,
       longPressThreshold,
     } = this.props
 
@@ -180,6 +183,7 @@ class MonthView extends React.Component {
         className="rbc-month-row"
         getNow={getNow}
         date={date}
+        timezone={timezone}
         range={week}
         events={events}
         maxRows={rowLimit}
@@ -213,6 +217,7 @@ class MonthView extends React.Component {
       getDrilldownView,
       dateFormat,
       culture,
+      timezone,
     } = this.props
 
     let isOffRange = dates.month(date) !== dates.month(currentDate)
@@ -233,6 +238,7 @@ class MonthView extends React.Component {
         <DateHeaderComponent
           label={label}
           date={date}
+          timezone={timezone}
           drilldownView={drilldownView}
           isOffRange={isOffRange}
           onDrillDown={e => this.handleHeadingClick(date, drilldownView, e)}

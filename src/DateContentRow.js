@@ -20,7 +20,8 @@ import EventEndingRow from './EventEndingRow'
 let isSegmentInSlot = (seg, slot) => seg.left <= slot && seg.right >= slot
 
 const propTypes = {
-  date: PropTypes.instanceOf(Date),
+  date: PropTypes.object,
+  timezone: PropTypes.string.isRequired,
   events: PropTypes.array.isRequired,
   range: PropTypes.array.isRequired,
 
@@ -140,6 +141,7 @@ class DateContentRow extends React.Component {
   render() {
     const {
       date,
+      timezone,
       rtl,
       events,
       range,
@@ -174,6 +176,7 @@ class DateContentRow extends React.Component {
         {
           startAccessor,
           endAccessor,
+          timezone,
         },
         range
       )

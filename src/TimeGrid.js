@@ -1,10 +1,10 @@
+import { ZonedDateTime } from 'js-joda'
 import PropTypes from 'prop-types'
 import cn from 'classnames'
 import raf from 'dom-helpers/util/requestAnimationFrame'
 import React, { Component } from 'react'
 import { findDOMNode } from 'react-dom'
 
-import dates from './utils/dates'
 import localizer from './localizer'
 import DayColumn from './DayColumn'
 import TimeColumn from './TimeColumn'
@@ -13,28 +13,30 @@ import Header from './Header'
 
 import getWidth from 'dom-helpers/query/width'
 import scrollbarSize from 'dom-helpers/util/scrollbarSize'
-import message from './utils/messages'
 
+import dates from './utils/dates'
+import message from './utils/messages'
+import { convertToTimezone } from './utils/dayViewLayout/event'
+import { notify } from './utils/helpers'
+import { accessor as get } from './utils/accessors'
+import { inRange, sortEvents, segStyle } from './utils/eventLevels'
 import { accessor, dateFormat } from './utils/propTypes'
 
-import { notify } from './utils/helpers'
-
-import { accessor as get } from './utils/accessors'
-
-import { inRange, sortEvents, segStyle } from './utils/eventLevels'
+const secondsTotal = 86400
 
 export default class TimeGrid extends Component {
   static propTypes = {
     events: PropTypes.array.isRequired,
+    timezone: PropTypes.string.isRequired,
     resources: PropTypes.array,
 
     step: PropTypes.number,
-    range: PropTypes.arrayOf(PropTypes.instanceOf(Date)),
-    min: PropTypes.instanceOf(Date),
-    max: PropTypes.instanceOf(Date),
+    range: PropTypes.arrayOf(PropTypes.object),
+    min: PropTypes.object.isRequired,
+    max: PropTypes.object.isRequired,
     getNow: PropTypes.func.isRequired,
 
-    scrollToTime: PropTypes.instanceOf(Date),
+    scrollToTime: PropTypes.object,
     eventPropGetter: PropTypes.func,
     dayPropGetter: PropTypes.func,
     dayFormat: dateFormat,
@@ -73,9 +75,7 @@ export default class TimeGrid extends Component {
 
   static defaultProps = {
     step: 30,
-    min: dates.startOf(new Date(), 'day'),
-    max: dates.endOf(new Date(), 'day'),
-    scrollToTime: dates.startOf(new Date(), 'day'),
+    scrollToTime: dates.startOf(ZonedDateTime.now(), 'day'),
     /* this is needed to satisfy requirements from TimeColumn required props
      * There is a strange bug in React, using ...TimeColumn.defaultProps causes weird crashes
      */
@@ -158,6 +158,9 @@ export default class TimeGrid extends Component {
       resources,
       allDayAccessor,
       showMultiDayTimes,
+      min,
+      max,
+      timezone,
     } = this.props
 
     width = width || this.state.gutterWidth
@@ -175,6 +178,7 @@ export default class TimeGrid extends Component {
         let eStart = get(event, startAccessor),
           eEnd = get(event, endAccessor)
 
+        // gather all day events
         if (
           get(event, allDayAccessor) ||
           (dates.isJustDate(eStart) && dates.isJustDate(eEnd)) ||
@@ -182,6 +186,7 @@ export default class TimeGrid extends Component {
         ) {
           allDayEvents.push(event)
         } else {
+          // normal events
           rangeEvents.push(event)
         }
       }
@@ -190,11 +195,12 @@ export default class TimeGrid extends Component {
     allDayEvents.sort((a, b) => sortEvents(a, b, this.props))
 
     let gutterRef = ref => (this._gutters[1] = ref && findDOMNode(ref))
+    const now = getNow()
 
     let eventsRendered = this.renderEvents(
       range,
       rangeEvents,
-      getNow(),
+      now,
       resources || [null]
     )
 
@@ -205,6 +211,8 @@ export default class TimeGrid extends Component {
         <div ref="content" className="rbc-time-content">
           <TimeColumn
             {...this.props}
+            min={dates.startOf(start, 'day')}
+            max={dates.endOf(start, 'day')}
             showLabels
             style={{ width }}
             ref={gutterRef}
@@ -226,16 +234,16 @@ export default class TimeGrid extends Component {
       resourceAccessor,
       resourceIdAccessor,
       components,
+      timezone,
     } = this.props
 
     return range.map((date, idx) => {
       let daysEvents = events.filter(event =>
-        dates.inRange(
-          date,
-          get(event, startAccessor),
-          get(event, endAccessor),
-          'day'
-        )
+        inRange(event, dates.startOf(date, 'day'), dates.endOf(date, 'day'), {
+          timezone,
+          startAccessor,
+          endAccessor,
+        })
       )
 
       return resources.map((resource, id) => {
@@ -250,8 +258,8 @@ export default class TimeGrid extends Component {
         return (
           <DayColumn
             {...this.props}
-            min={dates.merge(date, min)}
-            max={dates.merge(date, max)}
+            min={dates.startOf(dates.merge(date, min), 'day')}
+            max={dates.endOf(dates.merge(date, max), 'day')}
             resource={resource && resource.id}
             eventComponent={components.event}
             eventWrapperComponent={components.eventWrapper}
@@ -268,7 +276,7 @@ export default class TimeGrid extends Component {
   }
 
   renderHeader(range, events, width, resources) {
-    let { messages, rtl, selectable, components, getNow } = this.props
+    let { messages, timezone, rtl, selectable, components, getNow } = this.props
     let { isOverflowing } = this.state || {}
 
     let style = {}
@@ -304,6 +312,7 @@ export default class TimeGrid extends Component {
             {message(messages).allDay}
           </div>
           <DateContentRow
+            timezone={timezone}
             getNow={getNow}
             minRows={2}
             range={range}
@@ -458,7 +467,7 @@ export default class TimeGrid extends Component {
     const { min, max, scrollToTime } = props
 
     const diffMillis = scrollToTime - dates.startOf(scrollToTime, 'day')
-    const totalMillis = dates.diff(max, min)
+    const totalMillis = dates.diff(min, max)
 
     this._scrollRatio = diffMillis / totalMillis
   }
@@ -477,18 +486,28 @@ export default class TimeGrid extends Component {
     }
   }
 
+  // only works in a day-based view
   positionTimeIndicator() {
-    const { rtl, min, max, getNow } = this.props
+    const { rtl, min, max, getNow, timezone } = this.props
     const current = getNow()
+    const zonedMin = convertToTimezone(min, timezone)
+    const zonedMax = convertToTimezone(max, timezone)
 
-    const secondsGrid = dates.diff(max, min, 'seconds')
-    const secondsPassed = dates.diff(current, min, 'seconds')
+    const secondsPassed = dates.diff(
+      dates.startOf(current, 'day'),
+      current,
+      'seconds'
+    )
 
     const timeIndicator = this.refs.timeIndicator
-    const factor = secondsPassed / secondsGrid
+    const factor = (secondsPassed / secondsTotal) % 1
     const timeGutter = this._gutters[this._gutters.length - 1]
 
-    if (timeGutter && current >= min && current <= max) {
+    if (
+      timeGutter &&
+      dates.gte(current, zonedMin) &&
+      dates.lte(current, zonedMax)
+    ) {
       const pixelHeight = timeGutter.offsetHeight
       const offset = Math.floor(factor * pixelHeight)
 

@@ -1,3 +1,5 @@
+import { ZonedDateTime } from 'js-joda'
+import dates from './utils/dates'
 import contains from 'dom-helpers/query/contains'
 import closest from 'dom-helpers/query/closest'
 import events from 'dom-helpers/events'
@@ -39,10 +41,18 @@ const clickTolerance = 5
 const clickInterval = 250
 
 class Selection {
-  constructor(node, { global = false, longPressThreshold = 250 } = {}) {
+  constructor(
+    node,
+    {
+      global = false,
+      longPressThreshold = 250,
+      getNow = () => ZonedDateTime.now(),
+    } = {}
+  ) {
     this.container = node
     this.globalMouse = !node || global
     this.longPressThreshold = longPressThreshold
+    this.getNow = getNow
 
     this._listeners = Object.create(null)
 
@@ -284,7 +294,7 @@ class Selection {
 
   _handleClickEvent(e) {
     const { pageX, pageY, clientX, clientY } = getEventCoordinates(e)
-    const now = new Date().getTime()
+    const now = dates.nativeTime(this.getNow())
 
     if (
       this._lastClickData &&

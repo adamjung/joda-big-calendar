@@ -1,6 +1,7 @@
 import findIndex from 'lodash/findIndex'
 import dates from './dates'
 import { accessor as get } from './accessors'
+import { convertToTimezone } from './dayViewLayout/event'
 
 export function endOfRange(dateRange, unit = 'day') {
   return {
@@ -13,14 +14,20 @@ export function eventSegments(
   event,
   first,
   last,
-  { startAccessor, endAccessor },
+  { timezone, startAccessor, endAccessor }, // props
   range
 ) {
   let slots = dates.diff(first, last, 'day')
-  let start = dates.max(dates.startOf(get(event, startAccessor), 'day'), first)
-  let end = dates.min(dates.ceil(get(event, endAccessor), 'day'), last)
+  let zonedStart = convertToTimezone(get(event, startAccessor), timezone)
+  let zonedEnd = convertToTimezone(get(event, endAccessor), timezone)
 
-  let padding = findIndex(range, x => dates.eq(x, start, 'day'))
+  let start = dates.max(dates.startOf(zonedStart, 'day'), first)
+  let end = dates.min(dates.ceil(zonedEnd, 'day'), last)
+
+  let padding = findIndex(range, d => {
+    return dates.eq(d, start, 'day')
+  })
+
   let span = dates.diff(start, end, 'day')
 
   span = Math.min(span, slots)
@@ -65,15 +72,25 @@ export function eventLevels(rowSegments, limit = Infinity) {
   return { levels, extra }
 }
 
-export function inRange(e, start, end, { startAccessor, endAccessor }) {
-  let eStart = dates.startOf(get(e, startAccessor), 'day')
-  let eEnd = get(e, endAccessor)
+export function inRange(
+  e,
+  rangeStart,
+  rangeEnd,
+  { timezone, startAccessor, endAccessor, getNow }
+) {
+  const zonedStart = convertToTimezone(get(e, startAccessor), timezone)
+  const zonedEnd = convertToTimezone(get(e, endAccessor), timezone)
+  const zonedRangeStart = convertToTimezone(rangeStart, timezone)
+  const zonedRangeEnd = convertToTimezone(rangeEnd, timezone)
 
-  let startsBeforeEnd = dates.lte(eStart, end, 'day')
+  let eStart = dates.startOf(zonedStart, 'day')
+  let eEnd = convertToTimezone(get(e, endAccessor), timezone)
+
+  let startsBeforeEnd = dates.lte(eStart, zonedRangeEnd, 'day')
   // when the event is zero duration we need to handle a bit differently
-  let endsAfterStart = !dates.eq(eStart, eEnd, 'minutes')
-    ? dates.gt(eEnd, start, 'minutes')
-    : dates.gte(eEnd, start, 'minutes')
+  let endsAfterStart = !dates.eq(eStart, zonedRangeEnd, 'minutes')
+    ? dates.gt(eEnd, zonedRangeStart, 'minutes')
+    : dates.gte(eEnd, zonedRangeStart, 'minutes')
 
   return startsBeforeEnd && endsAfterStart
 }

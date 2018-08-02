@@ -6,7 +6,7 @@ import { elementType } from './utils/propTypes'
 export default class TimeSlot extends Component {
   static propTypes = {
     dayWrapperComponent: elementType,
-    value: PropTypes.instanceOf(Date).isRequired,
+    value: PropTypes.object.isRequired,
     isNow: PropTypes.bool,
     showLabel: PropTypes.bool,
     content: PropTypes.string,
@@ -22,7 +22,7 @@ export default class TimeSlot extends Component {
   }
 
   render() {
-    const { value, slotPropGetter, resource } = this.props
+    const { value, slotPropGetter, resource, isNow, showLabel } = this.props
     const Wrapper = this.props.dayWrapperComponent
     const { className, style } = (slotPropGetter && slotPropGetter(value)) || {}
 
@@ -33,8 +33,8 @@ export default class TimeSlot extends Component {
           className={cn(
             'rbc-time-slot',
             className,
-            this.props.showLabel && 'rbc-label',
-            this.props.isNow && 'rbc-now'
+            showLabel && 'rbc-label',
+            isNow && 'rbc-now'
           )}
         >
           {this.props.showLabel && <span>{this.props.content}</span>}
