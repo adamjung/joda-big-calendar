@@ -1,6 +1,16 @@
 /* eslint no-fallthrough: off */
-import dateMath from 'date-arithmetic'
+import dateMath from 'joda-date-arithmetic'
 import localizer from '../localizer'
+import {
+  use as jsJodaUse,
+  nativeJs,
+  ZonedDateTime,
+  LocalDateTime,
+  ZoneId,
+  IsoFields,
+} from 'js-joda'
+import jsJodaTimeZone from 'js-joda-timezone'
+jsJodaUse(jsJodaTimeZone)
 
 const MILLI = {
   seconds: 1000,
@@ -14,10 +24,11 @@ const MONTHS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 let dates = {
   ...dateMath,
 
-  monthsInYear(year) {
-    let date = new Date(year, 0, 1)
+  monthsInYear(year, timezone) {
+    const datetime = LocalDateTime.of(year, 1, 1)
+    const date = ZonedDateTime.of(datetime, timezone || ZoneId.SYSTEM)
 
-    return MONTHS.map(i => dates.month(date, i))
+    return MONTHS.map(i => dates.month(zdt, i))
   },
 
   firstVisibleDay(date, culture) {
@@ -63,11 +74,12 @@ let dates = {
     return days
   },
 
-  merge(date, time) {
+  merge(date, time, timezone) {
+    let tz = timezone || ZoneId.SYSTEM
     if (time == null && date == null) return null
 
-    if (time == null) time = new Date()
-    if (date == null) date = new Date()
+    if (time == null) time = ZonedDateTime.now(tz)
+    if (date == null) date = ZonedDateTime.now(tz)
 
     date = dates.startOf(date, 'day')
     date = dates.hours(date, dates.hours(time))
@@ -95,24 +107,28 @@ let dates = {
 
   duration(start, end, unit, firstOfWeek) {
     if (unit === 'day') unit = 'date'
-    return Math.abs(
-      dates[unit](start, undefined, firstOfWeek) -
-        dates[unit](end, undefined, firstOfWeek)
-    )
+    start = dates.nativeTime(dates[unit](start, undefined, firstOfWeek))
+    end = dates.nativeTime(dates[unit](end, undefined, firstOfWeek))
+
+    return Math.abs(start - end)
   },
 
   diff(dateA, dateB, unit) {
-    if (!unit || unit === 'milliseconds') return Math.abs(+dateA - +dateB)
+    let start, end
+
+    if (!unit || unit === 'milliseconds') {
+      start = dates.nativeTime(dateA)
+      end = dates.nativeTime(dateB)
+      return Math.abs(start - end)
+    }
+
+    start = dates.nativeTime(dates.startOf(dateA, unit)) / MILLI[unit]
+    end = dates.nativeTime(dates.startOf(dateB, unit)) / MILLI[unit]
 
     // the .round() handles an edge case
     // with DST where the total won't be exact
     // since one day in the range may be shorter/longer by an hour
-    return Math.round(
-      Math.abs(
-        +dates.startOf(dateA, unit) / MILLI[unit] -
-          +dates.startOf(dateB, unit) / MILLI[unit]
-      )
-    )
+    return Math.round(Math.abs(start - end))
   },
 
   total(date, unit) {
@@ -136,22 +152,27 @@ let dates = {
   },
 
   week(date) {
-    var d = new Date(date)
-    d.setHours(0, 0, 0)
-    d.setDate(d.getDate() + 4 - (d.getDay() || 7))
-    return Math.ceil(((d - new Date(d.getFullYear(), 0, 1)) / 8.64e7 + 1) / 7)
+    return date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
   },
 
-  today() {
-    return dates.startOf(new Date(), 'day')
+  today(timezone) {
+    return dates.startOf(ZonedDateTime.now(timezone || ZoneId.SYSTEM), 'day')
   },
 
-  yesterday() {
-    return dates.add(dates.startOf(new Date(), 'day'), -1, 'day')
+  yesterday(timezone) {
+    return dates.add(
+      dates.startOf(ZonedDateTime.now(timezone || ZoneId.SYSTEM), 'day'),
+      -1,
+      'day'
+    )
   },
 
-  tomorrow() {
-    return dates.add(dates.startOf(new Date(), 'day'), 1, 'day')
+  tomorrow(timezone) {
+    return dates.add(
+      dates.startOf(ZonedDateTime.now(timezone || ZoneId.SYSTEM), 'day'),
+      1,
+      'day'
+    )
   },
 }
 

@@ -1,3 +1,4 @@
+import { ZonedDateTime, ZoneId } from 'js-joda'
 import { accessor as get } from '../accessors'
 import dates from '../dates'
 
@@ -5,27 +6,36 @@ export function startsBefore(date, min) {
   return dates.lt(dates.merge(min, date), min, 'minutes')
 }
 
-export function positionFromDate(date, min, total) {
+export function positionFromDate(date, min) {
   if (startsBefore(date, min)) {
     return 0
   }
 
   const diff = dates.diff(min, dates.merge(min, date), 'minutes')
-  return Math.min(diff, total)
+  return diff
 }
 
 export class Event {
   constructor(data, props) {
-    const { startAccessor, endAccessor, min, totalMin } = props
+    const {
+      startAccessor,
+      endAccessor,
+      min,
+      totalMin,
+      timezone,
+      getNow,
+    } = props
     const [startDate, endDate] = normalizeDates(
       get(data, startAccessor),
       get(data, endAccessor),
       props
     )
-    this.startSlot = positionFromDate(startDate, min, totalMin)
-    this.endSlot = positionFromDate(endDate, min, totalMin)
-    this.start = +startDate
-    this.end = +endDate
+
+    this.startSlot = positionFromDate(startDate, min)
+    this.endSlot = positionFromDate(endDate, min)
+
+    this.start = dates.nativeTime(startDate)
+    this.end = dates.nativeTime(endDate)
     this.top = this.startSlot / totalMin * 100
     this.height = this.endSlot / totalMin * 100 - this.top
     this.data = data
@@ -100,41 +110,54 @@ export class Event {
   }
 }
 
+export function convertToTimezone(date, tzString) {
+  const zoneId = ZoneId.of(tzString)
+  if (date.zone().equals(zoneId)) {
+    return date
+  }
+
+  return date.withZoneSameInstant(zoneId)
+}
+
 /**
  * Return start and end dates with respect to timeslot positions.
  */
-function normalizeDates(startDate, endDate, { min, showMultiDayTimes }) {
+function normalizeDates(
+  startDate,
+  endDate,
+  { showMultiDayTimes, timezone, getNow }
+) {
+  const zonedStartDate = convertToTimezone(startDate, timezone)
+  const zonedEndDate = convertToTimezone(endDate, timezone)
+
   if (!showMultiDayTimes) {
-    return [startDate, endDate]
+    return [zonedStartDate, zonedEndDate]
   }
 
-  const current = new Date(min) // today at midnight
-  let c = new Date(current)
-  let s = new Date(startDate)
-  let e = new Date(endDate)
+  let current = getNow()
 
   // Use noon to compare dates to avoid DST issues.
-  s.setHours(12, 0, 0, 0)
-  e.setHours(12, 0, 0, 0)
-  c.setHours(12, 0, 0, 0)
+  let s = dates.hours(zonedStartDate, 12)
+  let e = dates.hours(zonedEndDate, 12)
+  let c = dates.hours(current, 12)
 
   // Current day is at the start, but it spans multiple days,
   // so we correct the end.
-  if (+c === +s && c < e) {
-    return [startDate, dates.endOf(startDate, 'day')]
+  if (dates.eq(c, s) && dates.lt(c, e)) {
+    return [zonedStartDate, dates.endOf(zonedStartDate, 'day')]
   }
 
   // Current day is in between start and end dates,
   // so we make it span all day.
-  if (c > s && c < e) {
+  if (dates.gt(c, s) && dates.lt(c, e)) {
     return [current, dates.endOf(current, 'day')]
   }
 
   // Current day is at the end of a multi day event,
   // so we make it start at midnight, and end normally.
-  if (c > s && +c === +e) {
-    return [current, endDate]
+  if (dates.gt(c, s) && dates.eq(c, e)) {
+    return [current, zonedEndDate]
   }
 
-  return [startDate, endDate]
+  return [zonedStartDate, zonedEndDate]
 }
