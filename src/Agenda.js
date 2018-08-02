@@ -16,7 +16,9 @@ import { isSelected } from './utils/selection'
 class Agenda extends React.Component {
   static propTypes = {
     events: PropTypes.array,
-    date: PropTypes.instanceOf(Date),
+    timezone: PropTypes.string.isRequired,
+    getNow: PropTypes.func.isRequired,
+    date: PropTypes.object,
     length: PropTypes.number.isRequired,
     titleAccessor: accessor.isRequired,
     tooltipAccessor: accessor.isRequired,
@@ -90,6 +92,7 @@ class Agenda extends React.Component {
   renderDay = (day, events, dayKey) => {
     let {
       culture,
+      timezone,
       components,
       titleAccessor,
       agendaDateFormat,
@@ -119,7 +122,7 @@ class Agenda extends React.Component {
         idx === 0 ? (
           <td rowSpan={events.length} className="rbc-agenda-date-cell">
             {DateComponent ? (
-              <DateComponent day={day} label={dateLabel} />
+              <DateComponent day={day} timezone={timezone} label={dateLabel} />
             ) : (
               dateLabel
             )}
@@ -138,7 +141,7 @@ class Agenda extends React.Component {
           </td>
           <td className="rbc-agenda-event-cell">
             {EventComponent ? (
-              <EventComponent event={event} title={title} />
+              <EventComponent event={event} timezone={timezone} title={title} />
             ) : (
               title
             )}
@@ -154,6 +157,7 @@ class Agenda extends React.Component {
       startAccessor,
       allDayAccessor,
       culture,
+      timezone,
       messages,
       components,
     } = this.props
@@ -185,7 +189,12 @@ class Agenda extends React.Component {
     return (
       <span className={labelClass.trim()}>
         {TimeComponent ? (
-          <TimeComponent event={event} day={day} label={label} />
+          <TimeComponent
+            event={event}
+            rimezone={timezone}
+            day={day}
+            label={label}
+          />
         ) : (
           label
         )}

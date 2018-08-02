@@ -1,3 +1,4 @@
+import { ZonedDateTime, LocalDateTime } from 'js-joda'
 import PropTypes from 'prop-types'
 import React from 'react'
 import { findDOMNode } from 'react-dom'
@@ -19,9 +20,11 @@ import getStyledEvents, {
 
 import TimeColumn from './TimeColumn'
 
-function snapToSlot(date, step) {
+function snapToSlot(date, step, timezone) {
   var roundTo = 1000 * 60 * step
-  return new Date(Math.floor(date.getTime() / roundTo) * roundTo)
+  return LocalDateTime.ofInstant(
+    Math.floor(dates.nativeTime(date) / roundTo) * roundTo
+  )
 }
 
 function startsAfter(date, max) {
@@ -33,8 +36,8 @@ class DayColumn extends React.Component {
     events: PropTypes.array.isRequired,
     components: PropTypes.object,
     step: PropTypes.number.isRequired,
-    min: PropTypes.instanceOf(Date).isRequired,
-    max: PropTypes.instanceOf(Date).isRequired,
+    min: PropTypes.object.isRequired,
+    max: PropTypes.object.isRequired,
     getNow: PropTypes.func.isRequired,
 
     rtl: PropTypes.bool,
@@ -49,6 +52,7 @@ class DayColumn extends React.Component {
     eventTimeRangeStartFormat: dateFormat,
     eventTimeRangeEndFormat: dateFormat,
     showMultiDayTimes: PropTypes.bool,
+    timezone: PropTypes.string.isRequired,
     culture: PropTypes.string,
     timeslots: PropTypes.number,
     messages: PropTypes.object,
@@ -168,12 +172,16 @@ class DayColumn extends React.Component {
       timeslots,
       titleAccessor,
       tooltipAccessor,
+      getNow,
+      timezone,
     } = this.props
 
     let styledEvents = getStyledEvents({
       events,
       startAccessor,
       endAccessor,
+      getNow,
+      timezone,
       min,
       showMultiDayTimes,
       totalMin: this._totalMin,
@@ -276,6 +284,7 @@ class DayColumn extends React.Component {
   _selectable = () => {
     let node = findDOMNode(this)
     let selector = (this._selector = new Selection(() => findDOMNode(this), {
+      getNow: this.props.getNow,
       longPressThreshold: this.props.longPressThreshold,
     }))
 
@@ -298,7 +307,7 @@ class DayColumn extends React.Component {
     }
 
     let selectionState = ({ y }) => {
-      let { step, min, max } = this.props
+      let { step, min, max, getNow } = this.props
       let { top, bottom } = getBoundsForNode(node)
 
       let mins = this._totalMin
@@ -307,7 +316,7 @@ class DayColumn extends React.Component {
 
       let current = (y - top) / range
 
-      current = snapToSlot(minToDate(mins * current, min), step)
+      current = snapToSlot(minToDate(mins * current, min, getNow()), step)
 
       if (!this.state.selecting) this._initialDateSlot = current
 
@@ -394,13 +403,12 @@ class DayColumn extends React.Component {
   }
 }
 
-function minToDate(min, date) {
-  var dt = new Date(date),
-    totalMins = dates.diff(dates.startOf(date, 'day'), date, 'minutes')
+function minToDate(min, date, now) {
+  var totalMins = dates.diff(dates.startOf(date, 'day'), date, 'minutes')
 
-  dt = dates.hours(dt, 0)
-  dt = dates.minutes(dt, totalMins + min)
-  dt = dates.seconds(dt, 0)
+  now = dates.hours(now, 0)
+  now = dates.minutes(now, totalMins + min)
+  now = dates.seconds(now, 0)
   return dates.milliseconds(dt, 0)
 }
 

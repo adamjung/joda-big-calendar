@@ -17,7 +17,7 @@ import Selection, { getBoundsForNode, isEvent } from './Selection'
 
 class BackgroundCells extends React.Component {
   static propTypes = {
-    date: PropTypes.instanceOf(Date),
+    date: PropTypes.object,
     getNow: PropTypes.func.isRequired,
     cellWrapperComponent: elementType,
     container: PropTypes.func,
@@ -29,7 +29,7 @@ class BackgroundCells extends React.Component {
     onSelectEnd: PropTypes.func,
     onSelectStart: PropTypes.func,
 
-    range: PropTypes.arrayOf(PropTypes.instanceOf(Date)),
+    range: PropTypes.arrayOf(PropTypes.object),
     rtl: PropTypes.bool,
     type: PropTypes.string,
   }
@@ -77,6 +77,7 @@ class BackgroundCells extends React.Component {
           const segmStyles = segStyle(1, range.length)
           const styles = Object.assign({}, dayStyles, segmStyles)
 
+          const isToday = dates.eq(date, current, 'day')
           return (
             <Wrapper key={index} value={date} range={range}>
               <div
@@ -85,7 +86,7 @@ class BackgroundCells extends React.Component {
                   'rbc-day-bg',
                   className,
                   selected && 'rbc-selected-cell',
-                  dates.eq(date, current, 'day') && 'rbc-today',
+                  isToday && 'rbc-today',
                   currentDate &&
                     dates.month(currentDate) !== dates.month(date) &&
                     'rbc-off-range-bg'
