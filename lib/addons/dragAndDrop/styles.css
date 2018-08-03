@@ -17,7 +17,7 @@
 }
 .rbc-addons-dnd.rbc-addons-dnd-is-dragging .rbc-event {
   pointer-events: none;
-  opacity: 0.5;
+  opacity: .50;
 }
 .rbc-addons-dnd .rbc-addons-dnd-resize-anchor {
   width: 100%;
@@ -42,36 +42,26 @@
 .rbc-addons-dnd .rbc-addons-dnd-resize-anchor:hover {
   cursor: ns-resize;
 }
-.rbc-addons-dnd
-  .rbc-addons-dnd-resize-anchor:hover
-  .rbc-addons-dnd-resize-icon {
+.rbc-addons-dnd .rbc-addons-dnd-resize-anchor:hover .rbc-addons-dnd-resize-icon {
   display: block;
 }
 .rbc-addons-dnd .rbc-addons-dnd-resizable-month-event {
   position: relative;
   user-drag: none;
 }
-.rbc-addons-dnd
-  .rbc-addons-dnd-resizable-month-event
-  .rbc-addons-dnd-resize-month-event-anchor {
+.rbc-addons-dnd .rbc-addons-dnd-resizable-month-event .rbc-addons-dnd-resize-month-event-anchor {
   width: 20px;
   height: 20px;
   top: 0;
 }
-.rbc-addons-dnd
-  .rbc-addons-dnd-resizable-month-event
-  .rbc-addons-dnd-resize-month-event-anchor:hover {
+.rbc-addons-dnd .rbc-addons-dnd-resizable-month-event .rbc-addons-dnd-resize-month-event-anchor:hover {
   cursor: ew-resize;
 }
-.rbc-addons-dnd
-  .rbc-addons-dnd-resizable-month-event
-  .rbc-addons-dnd-resize-month-event-anchor:first-child {
+.rbc-addons-dnd .rbc-addons-dnd-resizable-month-event .rbc-addons-dnd-resize-month-event-anchor:first-child {
   position: absolute;
   left: -5px;
 }
-.rbc-addons-dnd
-  .rbc-addons-dnd-resizable-month-event
-  .rbc-addons-dnd-resize-month-event-anchor:last-child {
+.rbc-addons-dnd .rbc-addons-dnd-resizable-month-event .rbc-addons-dnd-resize-month-event-anchor:last-child {
   position: absolute;
   right: -5px;
 }
