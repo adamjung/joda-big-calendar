@@ -317,8 +317,8 @@ class DayColumn extends React.Component {
 
       let current = (y - top) / range
 
-      current = snapToSlot(minToDate(mins * current, min, getNow()), step, timezone)
       console.log("HELLO:", current)
+      current = snapToSlot(minToDate(mins * current, min, getNow()), step, timezone)
 
       if (!this.state.selecting) this._initialDateSlot = current
 
