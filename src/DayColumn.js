@@ -22,7 +22,7 @@ import TimeColumn from './TimeColumn'
 
 function snapToSlot(date, step, timezone) {
   var roundTo = 1000 * 60 * step
-  return LocalDateTime.ofInstant(
+  return ZonedDateTime.ofInstant(
     Math.floor(dates.nativeTime(date) / roundTo) * roundTo
   )
 }
