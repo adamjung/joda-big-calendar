@@ -2,15 +2,12 @@
 import dateMath from 'joda-date-arithmetic'
 import localizer from '../localizer'
 import {
-  use as jsJodaUse,
   nativeJs,
   ZonedDateTime,
   LocalDateTime,
   ZoneId,
   IsoFields,
 } from 'js-joda'
-import jsJodaTimeZone from 'js-joda-timezone'
-jsJodaUse(jsJodaTimeZone)
 
 const MILLI = {
   seconds: 1000,
