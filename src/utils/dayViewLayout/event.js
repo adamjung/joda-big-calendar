@@ -118,7 +118,7 @@ export function convertToTimezone(date, tzString) {
   } else if (date.constructor.name === 'LocalDateTime') {
     return ZonedDateTime.of(date, zoneId)
   } else if (date.constructor.name === 'ZonedDateTime') {
-    if (date.zone().equals(zoneId)) {
+    if (date.zone().id === zoneId.id()) {
       return date
     }
 
