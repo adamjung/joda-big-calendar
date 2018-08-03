@@ -6,7 +6,6 @@ import { navigate } from './utils/constants'
 class Toolbar extends React.Component {
   static propTypes = {
     timezone: PropTypes.string.isRequired,
-    onTzChange: PropTypes.func,
     view: PropTypes.string.isRequired,
     views: PropTypes.arrayOf(PropTypes.string).isRequired,
     label: PropTypes.node.isRequired,
@@ -16,9 +15,7 @@ class Toolbar extends React.Component {
   }
 
   render() {
-    let { messages, label, onTzChange } = this.props
-    // const tzs = ZoneId.getAvailableZoneIds();
-    const tzs = ['America/Los_Angeles', 'America/New_York', 'Asia/Tokyo']
+    let { messages, label } = this.props
 
     return (
       <div className="rbc-toolbar">
@@ -44,18 +41,6 @@ class Toolbar extends React.Component {
         </span>
 
         <span className="rbc-toolbar-label">{label}</span>
-        <div
-          className="current-timezone"
-          style={{ display: 'flex', flexDirection: 'column' }}
-        >
-          <select
-            onChange={e => {
-              onTzChange(e.target.value)
-            }}
-          >
-            {tzs.map((ele, i) => <option key={i}>{ele}</option>)}
-          </select>
-        </div>
         <span className="rbc-btn-group">{this.viewNamesGroup(messages)}</span>
       </div>
     )

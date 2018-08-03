@@ -123,7 +123,6 @@ class Calendar extends React.Component {
      * Timezone in IANA format i.e 'America/Los_Angeles'
      */
     timezone: PropTypes.string.isRequired,
-    onTzChange: PropTypes.func,
 
     /**
      * Accessor for the event title, used to display event information. Should
@@ -744,7 +743,6 @@ class Calendar extends React.Component {
       events,
       culture,
       timezone,
-      onTzChange,
       components = {},
       formats = {},
       messages = {},
@@ -793,7 +791,6 @@ class Calendar extends React.Component {
             view={view}
             views={names}
             label={label}
-            onTzChange={onTzChange}
             onViewChange={this.handleViewChange}
             onNavigate={this.handleNavigate}
             messages={messages}
