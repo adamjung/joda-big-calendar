@@ -1,6 +1,6 @@
 {
   "name": "joda-big-calendar",
-  "version": "0.0.994",
+  "version": "0.0.995",
   "description": "Joda Calendar. forked from react-big-calendar",
   "author": "adam j. <ajung91@hotmail.com>",
   "repository": "adamjung/joda-big-calendar",
@@ -103,7 +103,7 @@
     "invariant": "^2.1.0",
     "joda-date-arithmetic": "1.0.4",
     "js-joda": "^1.8.2",
-    "js-joda-timezone": "^1.2.1",
+    "js-joda-timezone": "2.0.0",
     "lodash": "^4.17.10",
     "prop-types": "^15.5.8",
     "react-overlays": "^0.7.0",
