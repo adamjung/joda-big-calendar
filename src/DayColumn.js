@@ -1,4 +1,4 @@
-import { ZonedDateTime } from 'js-joda'
+import { ZonedDateTime, Instant } from 'js-joda'
 import PropTypes from 'prop-types'
 import React from 'react'
 import { findDOMNode } from 'react-dom'
