@@ -1,8 +1,8 @@
 {
   "name": "joda-big-calendar",
-  "version": "0.0.3",
-  "description": "Joda Calendar! forked from react-big-calendar",
-  "author": "adom j. <ajung91@hotmail.com>",
+  "version": "0.0.4",
+  "description": "Joda Calendar. forked from react-big-calendar",
+  "author": "adam j. <ajung91@hotmail.com>",
   "repository": "adamjung/joda-big-calendar",
   "license": "MIT",
   "main": "lib/index.js",
