@@ -75,7 +75,7 @@ export default class TimeGrid extends Component {
 
   static defaultProps = {
     step: 30,
-    scrollToTime: dates.startOf(ZonedDateTime.now(), 'day'),
+    // scrollToTime: dates.startOf(ZonedDateTime.now(), 'day'),
     /* this is needed to satisfy requirements from TimeColumn required props
      * There is a strange bug in React, using ...TimeColumn.defaultProps causes weird crashes
      */
@@ -127,14 +127,14 @@ export default class TimeGrid extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { range, scrollToTime } = this.props
+    const { range } = this.props
     // When paginating, reset scroll
-    if (
-      !dates.eq(nextProps.range[0], range[0], 'minute') ||
-      !dates.eq(nextProps.scrollToTime, scrollToTime, 'minute')
-    ) {
-      // this.calculateScroll(nextProps)
-    }
+    // if (
+    //   !dates.eq(nextProps.range[0], range[0], 'minute') ||
+    //   !dates.eq(nextProps.scrollToTime, scrollToTime, 'minute')
+    // ) {
+    // this.calculateScroll(nextProps)
+    // }
   }
 
   handleSelectAllDaySlot = (slots, slotInfo) => {
@@ -463,14 +463,14 @@ export default class TimeGrid extends Component {
     }
   }
 
-  calculateScroll(props = this.props) {
-    const { min, max, scrollToTime } = props
+  // calculateScroll(props = this.props) {
+  //   const { min, max, scrollToTime } = props
 
-    const diffMillis = scrollToTime - dates.startOf(scrollToTime, 'day')
-    const totalMillis = dates.diff(min, max)
+  //   const diffMillis = scrollToTime - dates.startOf(scrollToTime, 'day')
+  //   const totalMillis = dates.diff(min, max)
 
-    this._scrollRatio = diffMillis / totalMillis
-  }
+  //   this._scrollRatio = diffMillis / totalMillis
+  // }
 
   checkOverflow = () => {
     if (this._updatingOverflow) return
