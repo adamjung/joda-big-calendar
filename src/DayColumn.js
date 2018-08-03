@@ -86,7 +86,7 @@ class DayColumn extends React.Component {
   state = { selecting: false }
 
   componentDidMount() {
-    this.props.selectable && this._selectable()
+    // this.props.selectable && this._selectable()
   }
 
   componentWillUnmount() {
@@ -94,7 +94,7 @@ class DayColumn extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.selectable && !this.props.selectable) this._selectable()
+    // if (nextProps.selectable && !this.props.selectable) this._selectable()
     if (!nextProps.selectable && this.props.selectable)
       this._teardownSelectable()
   }
