@@ -1,4 +1,10 @@
-import { ZonedDateTime, LocalTime, LocalDate, LocalDateTime, ZoneId } from 'js-joda'
+import {
+  ZonedDateTime,
+  LocalTime,
+  LocalDate,
+  LocalDateTime,
+  ZoneId,
+} from 'js-joda'
 import { accessor as get } from '../accessors'
 import dates from '../dates'
 
@@ -113,11 +119,11 @@ export class Event {
 export function convertToTimezone(date, tzString) {
   const zoneId = ZoneId.of(tzString)
 
-  if (date instanceof LocalDate) {
+  if (date.constructor.name === 'LocalDate') {
     return ZonedDateTime.of(date, LocalTime.MIDNIGHT, zoneId)
-  } else if (date instanceof LocalDateTime) {
+  } else if (date.constructor.name === 'LocalDateTime') {
     return ZonedDateTime.of(date, zoneId)
-  } else if (date instanceof ZonedDateTime) {
+  } else if (date.constructor.name === 'ZonedDateTime') {
     if (date.zone().equals(zoneId)) {
       return date
     }
@@ -125,6 +131,7 @@ export function convertToTimezone(date, tzString) {
     return date.withZoneSameInstant(zoneId)
   }
 
+  // shouldn't end up here
   return ZonedDateTime.now(zoneId)
 }
 

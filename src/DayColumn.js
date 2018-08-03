@@ -23,7 +23,9 @@ import TimeColumn from './TimeColumn'
 function snapToSlot(date, step, timezone) {
   var roundTo = 1000 * 60 * step
   return ZonedDateTime.ofInstant(
-    Instant.ofEpochMilli(Math.floor(dates.nativeTime(date) / roundTo) * roundTo),
+    Instant.ofEpochMilli(
+      Math.floor(dates.nativeTime(date) / roundTo) * roundTo
+    ),
     ZoneId.of(timezone)
   )
 }
@@ -317,8 +319,12 @@ class DayColumn extends React.Component {
 
       let current = (y - top) / range
 
-      console.log("HELLO:", current)
-      current = snapToSlot(minToDate(mins * current, min, getNow()), step, timezone)
+      console.log('HELLO:', current)
+      current = snapToSlot(
+        minToDate(mins * current, min, getNow()),
+        step,
+        timezone
+      )
 
       if (!this.state.selecting) this._initialDateSlot = current
 
