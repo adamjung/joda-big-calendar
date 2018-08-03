@@ -1,4 +1,11 @@
-import { ZonedDateTime, Instant, LocalTime, LocalDate, LocalDateTime, ZoneId } from 'js-joda'
+import {
+  ZonedDateTime,
+  Instant,
+  LocalTime,
+  LocalDate,
+  LocalDateTime,
+  ZoneId,
+} from 'js-joda'
 import { accessor as get } from '../accessors'
 import dates from '../dates'
 
@@ -124,7 +131,7 @@ export function convertToTimezone(date, tzString) {
 
     try {
       return date.withZoneSameInstant(zoneId)
-    } catch(e) {
+    } catch (e) {
       return ZonedDateTime.ofInstant(
         Instant.ofEpochMilli(dates.nativeTime(date)),
         zoneId

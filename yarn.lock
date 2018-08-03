@@ -4989,9 +4989,9 @@ jest@^21.1.0:
   dependencies:
     jest-cli "^21.2.1"
 
-joda-date-arithmetic@1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/joda-date-arithmetic/-/joda-date-arithmetic-1.0.3.tgz#5a456a93dbfbcdd783cb9d64ab3f0046166a47fd"
+joda-date-arithmetic@1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/joda-date-arithmetic/-/joda-date-arithmetic-1.0.4.tgz#ce9f74ed053d70eb96a2dc9a1b7b31185c5b9aaa"
   dependencies:
     js-joda "^1.8.2"
     js-joda-timezone "^2.0.0"
