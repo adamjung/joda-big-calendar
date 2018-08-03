@@ -112,15 +112,15 @@ export class Event {
 
 export function convertToTimezone(date, tzString) {
   const zoneId = ZoneId.of(tzString)
-  if (date.zone().equals(zoneId)) {
-    return date
-  }
-
   if (date instanceof LocalDateTime) {
     return ZonedDateTime.of(date, zoneId)
   } else if (date instanceof LocalDate) {
     return ZonedDateTime.of(date, LocalTime.MIDNIGHT, zoneId)
   } else {
+    if (date.zone().equals(zoneId)) {
+      return date
+    }
+
     return date.withZoneSameInstant(zoneId)
   }
 }
