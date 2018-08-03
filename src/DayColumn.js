@@ -24,7 +24,7 @@ function snapToSlot(date, step, timezone) {
   var roundTo = 1000 * 60 * step
   return ZonedDateTime.ofInstant(
     Instant.ofEpochMilli(Math.floor(dates.nativeTime(date) / roundTo) * roundTo),
-    timezone
+    ZoneId.of(timezone)
   )
 }
 
