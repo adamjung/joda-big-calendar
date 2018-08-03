@@ -1,4 +1,4 @@
-import { ZonedDateTime, LocalDateTime } from 'js-joda'
+import { ZonedDateTime } from 'js-joda'
 import PropTypes from 'prop-types'
 import React from 'react'
 import { findDOMNode } from 'react-dom'
@@ -318,6 +318,7 @@ class DayColumn extends React.Component {
       let current = (y - top) / range
 
       current = snapToSlot(minToDate(mins * current, min, getNow()), step, timezone)
+      console.log("HELLO:", current)
 
       if (!this.state.selecting) this._initialDateSlot = current
 
