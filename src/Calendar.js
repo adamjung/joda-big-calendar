@@ -1,5 +1,5 @@
-import { ZonedDateTime, ZoneId, use as jsJodaUse } from 'js-joda'
-import jsJodaTimeZone from 'js-joda-timezone'
+import { ZonedDateTime, ZoneId } from 'js-joda'
+import 'js-joda-timezone'
 import PropTypes from 'prop-types'
 import React from 'react'
 import uncontrollable from 'uncontrollable'
@@ -27,7 +27,6 @@ import omit from 'lodash/omit'
 import defaults from 'lodash/defaults'
 import transform from 'lodash/transform'
 import mapValues from 'lodash/mapValues'
-jsJodaUse(jsJodaTimezone)
 
 function viewNames(_views) {
   return !Array.isArray(_views) ? Object.keys(_views) : _views
