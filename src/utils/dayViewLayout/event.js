@@ -6,6 +6,7 @@ import {
   LocalDateTime,
   ZoneId,
 } from 'js-joda'
+import 'js-joda-timezone'
 import { accessor as get } from '../accessors'
 import dates from '../dates'
 
