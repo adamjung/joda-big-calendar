@@ -5,6 +5,7 @@ import events from '../events'
 
 let allViews = Object.keys(BigCalendar.Views).map(k => BigCalendar.Views[k])
 
+BigCalendar.jodaLocalizer()
 let Basic = ({ timezone, onTzChange }) => (
   <BigCalendar
     events={events}

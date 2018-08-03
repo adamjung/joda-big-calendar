@@ -4,9 +4,6 @@ import Intro from './Intro.md'
 import cn from 'classnames'
 import { render } from 'react-dom'
 
-import localizer from 'react-big-calendar/lib/localizers/joda'
-localizer()
-
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'font-awesome/css/font-awesome.min.css'
 
