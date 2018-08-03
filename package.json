@@ -1,12 +1,11 @@
 {
-  "name": "react-big-calendar",
-  "version": "0.18.1",
-  "description": "Calendar! with events",
-  "author": "Jason Quense <monastic.panic@gmail.com>",
-  "repository": "intljusticemission/react-big-calendar",
+  "name": "joda-big-calendar",
+  "version": "0.0.1",
+  "description": "Joda Calendar! forked from react-big-calendar",
+  "author": "adom j. <ajung91@hotmail.com>",
+  "repository": "adamjung/joda-big-calendar",
   "license": "MIT",
   "main": "lib/index.js",
-  "style": "lib/css/react-big-calendar.css",
   "files": ["lib/", "LICENSE", "README.md", "CHANGELOG.md"],
   "keywords": [
     "scheduler",
@@ -14,7 +13,8 @@
     "react",
     "calendar",
     "events",
-    "full calendar"
+    "full calendar",
+    "big calendar"
   ],
   "scripts": {
     "clean": "rimraf lib",
