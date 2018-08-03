@@ -92,7 +92,7 @@ export default class TimeGrid extends Component {
 
   componentWillMount() {
     this._gutters = []
-    this.calculateScroll()
+    // this.calculateScroll()
   }
 
   componentDidMount() {
@@ -133,7 +133,7 @@ export default class TimeGrid extends Component {
       !dates.eq(nextProps.range[0], range[0], 'minute') ||
       !dates.eq(nextProps.scrollToTime, scrollToTime, 'minute')
     ) {
-      this.calculateScroll(nextProps)
+      // this.calculateScroll(nextProps)
     }
   }
 
